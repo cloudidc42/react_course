@@ -1,0 +1,592 @@
+# Part 44: Design System
+
+## ข้อมูล Part
+- **Steps:** 1361-1400
+- **ระดับ:** Intermediate
+- **เวลาเรียน:** 3.5 ชั่วโมง
+- **Prerequisites:** Part 43 (E2E Testing)
+
+---
+
+## สารบัญ
+
+1. [Design System Introduction](#1-design-system-introduction)
+2. [Design Tokens](#2-design-tokens)
+3. [shadcn/ui](#3-shadcnui)
+4. [Storybook](#4-storybook)
+5. [Component Documentation](#5-component-documentation)
+6. [Theming](#6-theming)
+7. [Dark Mode](#7-dark-mode)
+8. [Quiz](#quiz)
+
+---
+
+## Step 1361: Design System Introduction
+
+### 1. Design System Introduction
+
+Design System คือ Collection ของ Reusable Components, Guidelines, และ Tokens
+
+#### ประโยชน์
+
+```
+1. Consistency - UI สม่ำเสมอทั้ง App
+2. Speed - ไม่ต้องสร้าง Component ซ้ำๆ
+3. Collaboration - Designer และ Developer พูดภาษาเดียวกัน
+4. Maintenance - แก้ที่เดียว ใช้ได้ทุกที่
+```
+
+#### องค์ประกอบ
+
+```
+Design System
+├── Design Tokens (Colors, Typography, Spacing, Shadows)
+├── Components (Button, Input, Card, Modal)
+├── Patterns (Forms, Navigation, Data Display)
+├── Guidelines (Do's and Don'ts)
+└── Documentation (Storybook)
+```
+
+---
+
+## Step 1364: Design Tokens
+
+### 2. Design Tokens
+
+Design Tokens คือ Variables สำหรับ Visual Properties
+
+#### tailwind.config.ts
+
+```typescript
+import type { Config } from 'tailwindcss'
+
+const config: Config = {
+  darkMode: ['class'],
+  content: [
+    './pages/**/*.{ts,tsx}',
+    './components/**/*.{ts,tsx}',
+    './app/**/*.{ts,tsx}',
+  ],
+  theme: {
+    container: {
+      center: true,
+      padding: '2rem',
+      screens: {
+        '2xl': '1400px',
+      },
+    },
+    extend: {
+      colors: {
+        // Brand Colors
+        primary: {
+          DEFAULT: 'hsl(var(--primary))',
+          foreground: 'hsl(var(--primary-foreground))',
+        },
+        secondary: {
+          DEFAULT: 'hsl(var(--secondary))',
+          foreground: 'hsl(var(--secondary-foreground))',
+        },
+        // Semantic Colors
+        destructive: {
+          DEFAULT: 'hsl(var(--destructive))',
+          foreground: 'hsl(var(--destructive-foreground))',
+        },
+        // Neutral Colors
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
+        card: {
+          DEFAULT: 'hsl(var(--card))',
+          foreground: 'hsl(var(--card-foreground))',
+        },
+        border: 'hsl(var(--border))',
+        input: 'hsl(var(--input))',
+        ring: 'hsl(var(--ring))',
+        muted: {
+          DEFAULT: 'hsl(var(--muted))',
+          foreground: 'hsl(var(--muted-foreground))',
+        },
+        accent: {
+          DEFAULT: 'hsl(var(--accent))',
+          foreground: 'hsl(var(--accent-foreground))',
+        },
+      },
+      borderRadius: {
+        lg: 'var(--radius)',
+        md: 'calc(var(--radius) - 2px)',
+        sm: 'calc(var(--radius) - 4px)',
+      },
+      fontFamily: {
+        sans: ['var(--font-inter)'],
+        mono: ['var(--font-mono)'],
+      },
+    },
+  },
+  plugins: [require('tailwindcss-animate')],
+}
+
+export default config
+```
+
+#### CSS Variables (globals.css)
+
+```css
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
+}
+```
+
+---
+
+## Step 1368: shadcn/ui
+
+### 3. shadcn/ui
+
+shadcn/ui คือ Collection ของ Beautiful Components สร้างด้วย Radix UI และ Tailwind
+
+#### Setup
+
+```bash
+npx shadcn@latest init
+
+# ตอบคำถาม:
+# TypeScript: Yes
+# Style: Default
+# Base color: Slate
+# CSS variables: Yes
+```
+
+#### ติดตั้ง Components
+
+```bash
+# ติดตั้ง Component เดียว
+npx shadcn@latest add button
+
+# ติดตั้งหลาย Components
+npx shadcn@latest add button input card dialog
+
+# ดู Components ทั้งหมด
+npx shadcn@latest add
+```
+
+#### ใช้งาน Components
+
+```typescript
+// components/ui/button.tsx (Generated by shadcn)
+import * as React from "react"
+import { Slot } from "@radix-ui/react-slot"
+import { cva, type VariantProps } from "class-variance-authority"
+import { cn } from "@/lib/utils"
+
+const buttonVariants = cva(
+  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  {
+    variants: {
+      variant: {
+        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+        outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        ghost: "hover:bg-accent hover:text-accent-foreground",
+        link: "text-primary underline-offset-4 hover:underline",
+      },
+      size: {
+        default: "h-10 px-4 py-2",
+        sm: "h-9 rounded-md px-3",
+        lg: "h-11 rounded-md px-8",
+        icon: "h-10 w-10",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+)
+
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean
+}
+
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, asChild = false, ...props }, ref) => {
+    const Comp = asChild ? Slot : "button"
+    return (
+      <Comp
+        className={cn(buttonVariants({ variant, size, className }))}
+        ref={ref}
+        {...props}
+      />
+    )
+  }
+)
+Button.displayName = "Button"
+
+export { Button, buttonVariants }
+```
+
+---
+
+## Step 1374: Storybook
+
+### 4. Storybook
+
+Storybook คือ Tool สำหรับ Document และ Test UI Components
+
+#### Setup
+
+```bash
+npx storybook@latest init
+
+# Start Storybook
+npm run storybook
+```
+
+#### เขียน Story
+
+```typescript
+// components/Button.stories.tsx
+import type { Meta, StoryObj } from '@storybook/react'
+import { Button } from './Button'
+
+const meta: Meta<typeof Button> = {
+  title: 'UI/Button',
+  component: Button,
+  parameters: {
+    layout: 'centered',
+  },
+  tags: ['autodocs'],
+  argTypes: {
+    variant: {
+      control: 'select',
+      options: ['default', 'destructive', 'outline', 'secondary', 'ghost', 'link'],
+    },
+    size: {
+      control: 'select',
+      options: ['default', 'sm', 'lg', 'icon'],
+    },
+  },
+}
+
+export default meta
+type Story = StoryObj<typeof meta>
+
+export const Default: Story = {
+  args: {
+    children: 'Click me',
+    variant: 'default',
+    size: 'default',
+  },
+}
+
+export const Destructive: Story = {
+  args: {
+    children: 'Delete',
+    variant: 'destructive',
+  },
+}
+
+export const Outline: Story = {
+  args: {
+    children: 'Cancel',
+    variant: 'outline',
+  },
+}
+
+export const Loading: Story = {
+  args: {
+    children: 'Loading...',
+    disabled: true,
+  },
+}
+
+export const AllVariants: Story = {
+  render: () => (
+    <div className="flex gap-4 flex-wrap">
+      <Button variant="default">Default</Button>
+      <Button variant="destructive">Destructive</Button>
+      <Button variant="outline">Outline</Button>
+      <Button variant="secondary">Secondary</Button>
+      <Button variant="ghost">Ghost</Button>
+      <Button variant="link">Link</Button>
+    </div>
+  ),
+}
+```
+
+---
+
+## Step 1379: Component Documentation
+
+### 5. Component Documentation
+
+#### JSDoc Comments
+
+```typescript
+/**
+ * Button Component
+ * 
+ * @description ปุ่มหลักของระบบ รองรับหลาย Variants และ Sizes
+ * 
+ * @example
+ * ```tsx
+ * // Basic Usage
+ * <Button>Click me</Button>
+ * 
+ * // With Variant
+ * <Button variant="destructive">Delete</Button>
+ * 
+ * // As Link
+ * <Button asChild>
+ *   <Link href="/about">About</Link>
+ * </Button>
+ * ```
+ */
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  /** Variant ของปุ่ม */
+  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'
+  /** ขนาดของปุ่ม */
+  size?: 'default' | 'sm' | 'lg' | 'icon'
+  /** Render as Child Component */
+  asChild?: boolean
+  /** Loading State */
+  loading?: boolean
+}
+```
+
+---
+
+## Step 1383: Theming
+
+### 6. Theming
+
+#### Theme Provider
+
+```typescript
+// components/ThemeProvider.tsx
+"use client"
+
+import * as React from "react"
+import { ThemeProvider as NextThemesProvider } from "next-themes"
+import { type ThemeProviderProps } from "next-themes/dist/types"
+
+export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
+  return <NextThemesProvider {...props}>{children}</NextThemesProvider>
+}
+```
+
+#### Setup ใน Layout
+
+```typescript
+// app/layout.tsx
+import { ThemeProvider } from "@/components/ThemeProvider"
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="th" suppressHydrationWarning>
+      <body>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
+      </body>
+    </html>
+  )
+}
+```
+
+---
+
+## Step 1387: Dark Mode
+
+### 7. Dark Mode
+
+#### Theme Toggle Component
+
+```typescript
+// components/ThemeToggle.tsx
+"use client"
+
+import * as React from "react"
+import { Moon, Sun } from "lucide-react"
+import { useTheme } from "next-themes"
+import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
+export function ThemeToggle() {
+  const { setTheme } = useTheme()
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="icon">
+          <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+          <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+          <span className="sr-only">Toggle theme</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={() => setTheme("light")}>
+          Light
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme("dark")}>
+          Dark
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme("system")}>
+          System
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+```
+
+---
+
+## Step 1393: Tips และ Best Practices
+
+### Tips และ Best Practices
+
+```markdown
+## Design System Best Practices
+
+1. ใช้ Design Tokens (CSS Variables) แทน Hard-coded Values
+   ✓ color: hsl(var(--primary))
+   ✗ color: #3b82f6
+
+2. Document Component ด้วย Storybook
+   - ทุก Component ต้องมี Story
+   - แสดง All Variants
+
+3. ใช้ CVA (Class Variance Authority) สำหรับ Variants
+   - Type-safe Variants
+   - Easy to Extend
+
+4. Follow Atomic Design
+   Atoms → Molecules → Organisms → Templates → Pages
+
+5. Accessibility ในทุก Component
+   - Role, aria-label, keyboard navigation
+
+6. ทดสอบ Dark Mode
+   - ทุก Component ต้องรองรับ Dark Mode
+```
+
+---
+
+## Quiz
+
+### แบบทดสอบ Part 44
+
+**คำถามที่ 1:** Design Tokens คืออะไร?
+- A) TypeScript Types
+- B) Variables สำหรับ Visual Properties เช่น Colors, Spacing ✓
+- C) API Endpoints
+- D) Database Fields
+
+**คำถามที่ 2:** shadcn/ui แตกต่างจาก Component Libraries อื่นอย่างไร?
+- A) ฟรีกว่า
+- B) Copy Code เข้าในโปรเจกต์ตรงๆ แทนที่จะเป็น Dependency ✓
+- C) มี Components มากกว่า
+- D) ใช้งานง่ายกว่า
+
+**คำถามที่ 3:** CVA (Class Variance Authority) ใช้ทำอะไร?
+- A) Validate CSS
+- B) จัดการ Component Variants แบบ Type-safe ✓
+- C) Build CSS
+- D) Test Components
+
+**คำถามที่ 4:** Storybook ช่วยอะไร?
+- A) Deploy Application
+- B) Document และ Develop Components แบบ Isolated ✓
+- C) Test API
+- D) Manage State
+
+**คำถามที่ 5:** `suppressHydrationWarning` ใน html tag ใช้เพื่ออะไร?
+- A) ปิด Warnings ทั้งหมด
+- B) ป้องกัน Hydration Mismatch เมื่อ Theme เปลี่ยน ✓
+- C) เร่งความเร็ว
+- D) Fix Bugs
+
+---
+
+## สรุป Part 44
+
+ใน Part นี้เราได้เรียนรู้:
+
+1. **Design System** - Concept และ Benefits
+2. **Design Tokens** - CSS Variables, Tailwind Config
+3. **shadcn/ui** - Setup และการใช้งาน
+4. **Storybook** - Component Documentation
+5. **Component Documentation** - JSDoc, Props
+6. **Theming** - ThemeProvider, next-themes
+7. **Dark Mode** - ThemeToggle Component
+
+---
+
+➡️ **Part ถัดไป:** [Part 45: Accessibility](./part-45-accessibility.md)
